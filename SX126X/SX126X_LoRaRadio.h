@@ -25,6 +25,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #ifndef MBED_LORA_RADIO_DRV_SX126X_LORARADIO_H_
 #define MBED_LORA_RADIO_DRV_SX126X_LORARADIO_H_
 
+#include "Arduino.h"
 #include "mbed_critical.h"
 #include "PinNames.h"
 #include "InterruptIn.h"
@@ -34,10 +35,9 @@ SPDX-License-Identifier: BSD-3-Clause
 #include "AnalogIn.h"
 #include "SPI.h"
 #include "platform/PlatformMutex.h"
-#ifdef MBED_CONF_RTOS_PRESENT
+
 #include "rtos/Thread.h"
 #include "rtos/ThisThread.h"
-#endif
 #include "sx126x_ds.h"
 #include "lorawan/LoRaRadio.h"
 

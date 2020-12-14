@@ -21,21 +21,22 @@ Copyright (c) 2019, Arm Limited and affiliates.
 
 SPDX-License-Identifier: BSD-3-Clause
 */
+#include <Arduino.h>
+#include <stdio.h>
+#include <math.h> //rint
+#include <string.h>
+#include "PinNames.h"
 
-#include <math.h>
 #include "ThisThread.h"
 #include "mbed_wait_api.h"
 #include "Timer.h"
 #include "SX126X_LoRaRadio.h"
 
-#ifdef MBED_CONF_SX126X_LORA_DRIVER_SPI_FREQUENCY
-#define SPI_FREQUENCY    MBED_CONF_SX126X_LORA_DRIVER_SPI_FREQUENCY
+#ifdef MBED_SX126X_LORA_RADIO_SPI_FREQUENCY
+#define SPI_FREQUENCY    MBED_SX126X_LORA_RADIO_SPI_FREQUENCY
 #else
-#define SPI_FREQUENCY    16000000
+#define SPI_FREQUENCY    8000000
 #endif
-
-using namespace mbed;
-using namespace rtos;
 
 #ifdef MBED_CONF_RTOS_PRESENT
 /**
@@ -203,7 +204,8 @@ bool SX126X_LoRaRadio::perform_carrier_sense(radio_modems_t modem,
     receive();
 
     // hold on a bit, radio turn-around time
-    ThisThread::sleep_for(1);
+    //ThisThread::sleep_for(1);
+    wait_ms(1);
 
     Timer elapsed_time;
     elapsed_time.start();
@@ -409,7 +411,7 @@ void SX126X_LoRaRadio::init_radio(radio_events_t *events)
     _spi.format(8, 0);
     _spi.frequency(SPI_FREQUENCY);
     // 100 us wait to settle down
-    wait_us(100);
+    wait(0.1);
 
     radio_reset();
 
@@ -504,10 +506,12 @@ void SX126X_LoRaRadio::radio_reset()
     _reset_ctl.output();
     _reset_ctl = 0;
     // should be enough, required is 50-100 us
-    ThisThread::sleep_for(2);
+    //ThisThread::sleep_for(2);
+    wait_ms(2);
     _reset_ctl.input();
     // give some time for automatic image calibration
-    ThisThread::sleep_for(6);
+    //ThisThread::sleep_for(6);
+    wait_ms(6);
 }
 
 void SX126X_LoRaRadio::wakeup()
@@ -516,11 +520,11 @@ void SX126X_LoRaRadio::wakeup()
     // now we should wait for the _busy line to go low
     if (_operation_mode == MODE_SLEEP) {
         _chip_select = 0;
-        wait_us(100);
+        wait(0.1);
         _chip_select = 1;
         //wait_us(100);
 #if MBED_CONF_SX126X_LORA_DRIVER_SLEEP_MODE == 1
-        wait_us(3500);
+        wait(3.5);
         // whenever we wakeup from Cold sleep state, we need to perform
         // image calibration
         _force_image_calibration = true;
@@ -541,7 +545,8 @@ void SX126X_LoRaRadio::sleep(void)
 #endif
 
     write_opmode_command(RADIO_SET_SLEEP, &sleep_state, 1);
-    ThisThread::sleep_for(2);
+    //ThisThread::sleep_for(2);
+    wait_ms(2);
 }
 
 uint32_t SX126X_LoRaRadio::random(void)
